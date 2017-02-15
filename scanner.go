@@ -21,11 +21,15 @@ type Tag string
 type Queries map[Tag]string
 
 // ParseReader takes an io.Reader and returns Queries or an error.
-func ParseReader(reader io.Reader) (Queries, error) {
+func ParseReader(reader io.Reader, preprocessors ...func(string) string) (Queries, error) {
 	var (
-		lastTag  Tag
-		lastLine parsedLine
+		lastTag      Tag
+		lastLine     parsedLine
+		preprocessor func(string) string
 	)
+	if len(preprocessors) > 0 {
+		preprocessor = preprocessors[0]
+	}
 
 	queries := make(Queries)
 	scanner := bufio.NewScanner(reader)
@@ -46,6 +50,9 @@ func ParseReader(reader io.Reader) (Queries, error) {
 			}
 
 			query := line.Value
+			if preprocessor != nil {
+				query = preprocessor(query)
+			}
 			// if query is multiline
 			if queries[lastTag] != "" {
 				query = " " + query

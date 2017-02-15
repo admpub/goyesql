@@ -13,19 +13,19 @@ import (
 // Some helpers to read files
 
 // ParseFile reads a file and return Queries or an error
-func ParseFile(path string) (Queries, error) {
+func ParseFile(path string, preprocessors ...func(string) string) (Queries, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	return ParseReader(file)
+	return ParseReader(file, preprocessors...)
 }
 
 // MustParseFile calls ParseFile but panic if an error occurs
-func MustParseFile(path string) Queries {
-	queries, err := ParseFile(path)
+func MustParseFile(path string, preprocessors ...func(string) string) Queries {
+	queries, err := ParseFile(path, preprocessors...)
 	if err != nil {
 		panic(err)
 	}
@@ -34,8 +34,8 @@ func MustParseFile(path string) Queries {
 }
 
 // ParseBytes parses bytes and returns Queries or an error.
-func ParseBytes(b []byte) (Queries, error) {
-	return ParseReader(bytes.NewReader(b))
+func ParseBytes(b []byte, preprocessors ...func(string) string) (Queries, error) {
+	return ParseReader(bytes.NewReader(b), preprocessors...)
 }
 
 // MustParseBytes parses bytes but panics if an error occurs.
